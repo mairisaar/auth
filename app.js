@@ -1,16 +1,16 @@
 //Level 1 - username and password only
 //Level 2 - encryption
-//Level 3
-//Level 4
-//Level 5
-//Level 6
+//Level 3 - hashing passwords
+//Level 4 - salting and hashing passwords with bcrypt
+//Level 5 -
+//Level 6 - OAuth 2.0
 
 require('dotenv').config();
 const express = require("express");
 const ejs = require("ejs");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
-const encrypt = require("mongoose-encryption");
+const md5 = require("md5");
 
 const app = express();
 
@@ -24,8 +24,6 @@ const userSchema = new mongoose.Schema({
   email: String,
   password: String
 });
-
-userSchema.plugin(encrypt, { secret: process.env.SECRET, encryptedFields: ["password"] }); //add before you compiling mongoose model
 
 
 const User = new mongoose.model("User", userSchema);
@@ -50,7 +48,7 @@ app.post("/register", function(req, res){
 
   const newUser = new User({
     email: req.body.username,
-    password: req.body.password
+    password: md5(req.body.password)
   });
 
   newUser.save(function(err){
@@ -69,7 +67,7 @@ app.post("/login", function(req, res){
       console.log(err);
     }else{
       if(foundUser){
-        if(foundUser.password === req.body.password){
+        if(foundUser.password === md5(req.body.password)){
           res.render("secrets");
         }
       }
