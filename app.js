@@ -2,7 +2,7 @@
 //Level 2 - encryption
 //Level 3 - hashing passwords
 //Level 4 - salting and hashing passwords with bcrypt
-//Level 5 -
+//Level 5 - cookies and sessions
 //Level 6 - OAuth 2.0
 
 require('dotenv').config();
@@ -10,7 +10,8 @@ const express = require("express");
 const ejs = require("ejs");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
-const md5 = require("md5");
+const bcrypt = require("bcrypt");
+const saltRounds = 10;
 
 const app = express();
 
@@ -46,18 +47,21 @@ app.get("/logout", function(req, res){
 
 app.post("/register", function(req, res){
 
-  const newUser = new User({
-    email: req.body.username,
-    password: md5(req.body.password)
+  bcrypt.hash(req.body.password, saltRounds, function(err, hash) {
+    const newUser = new User({
+      email: req.body.username,
+      password: hash
+    });
+
+    newUser.save(function(err){
+      if(err){
+        console.log(err);
+      }else{
+        res.render("secrets");
+      }
+    });
   });
 
-  newUser.save(function(err){
-    if(err){
-      console.log(err);
-    }else{
-      res.render("secrets");
-    }
-  });
 });
 
 app.post("/login", function(req, res){
@@ -67,9 +71,9 @@ app.post("/login", function(req, res){
       console.log(err);
     }else{
       if(foundUser){
-        if(foundUser.password === md5(req.body.password)){
+        bcrypt.compare(req.body.password, foundUser.password, function(err, result) {
           res.render("secrets");
-        }
+        });
       }
     }
   });
