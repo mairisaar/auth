@@ -133,6 +133,9 @@ app.get("/secrets", function(req, res){
   }
 });
 
+app.get("/submit", function(req, res){
+  res.render("submit");
+})
 
 app.post("/register", function(req, res){
 

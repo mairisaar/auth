@@ -14,3 +14,8 @@ body {
   color: #fff;
   background-color: #000;
 }
+
+.logo-img {
+  height: 120px;
+  width: auto;
+}
